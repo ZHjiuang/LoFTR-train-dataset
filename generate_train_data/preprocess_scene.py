@@ -249,93 +249,94 @@ test_mask = np.array([True if id in test_sample else False for id in image_ids])
 pair_infos = []
 for image_id in tqdm(train_sample, total=len(train_sample), desc="Get image pairs train"):
     overlap_score = overlap_matrix[image_id, :]  # 单张图像与各个图像的匹配分数
-    match_pairs = np.where(overlap_score > 0.7)[0]
+    match_pairs = np.where(overlap_score > 0.1)[0]
     for match_id in match_pairs:
         if match_id in train_sample:
             pair_infos.append((np.array([image_id, match_id]),  # 匹配对
                                overlap_score[match_id],      # 该匹配对的重叠分数
                                None))                         # 占位，使得与MegaDepth数据中的pair_infos数据格式一致，这个值其实在LoFTR中没有用到
 
-train_image_paths = np.array(image_paths.copy(), dtype=np.object)
+train_image_paths = np.array(image_paths.copy(), dtype=object)
 train_image_paths[~train_mask] = None
-train_depth_paths = np.array(depth_paths.copy(), dtype=np.object)
+train_depth_paths = np.array(depth_paths.copy(), dtype=object)
 train_depth_paths[~train_mask] = None
-train_intrinsics = np.array(intrinsics.copy(), dtype=np.object)
+train_intrinsics = np.array(intrinsics.copy(), dtype=float)
 train_intrinsics[~train_mask] = None
-train_poses = np.array(poses.copy(), dtype=np.object)
+train_poses = np.array(poses.copy(), dtype=float)
 train_poses[~train_mask] = None
+pair_infos = np.array(pair_infos, dtype=object)
 
-np.savez(
-    os.path.join(args.base_path, '%s_train.npz' % scene_name),
-    image_paths=train_image_paths,
-    depth_paths=train_depth_paths,
-    intrinsics=train_intrinsics,
-    poses=train_poses,
-    pair_infos=pair_infos,
-    # overlap_matrix=overlap_matrix,
-    # scale_ratio_matrix=scale_ratio_matrix,
-    # angles=angles,
-    # n_points3D=n_points3D,
-    # points3D_id_to_2D=points3D_id_to_2D,
-    # points3D_id_to_ndepth=points3D_id_to_ndepth
-)
+data_train = {
+    'image_paths': train_image_paths,
+    'depth_paths': train_depth_paths,
+    'intrinsics': train_intrinsics,
+    'poses': train_poses,
+    'pair_infos': pair_infos
+}
+np.savez(os.path.join(base_path, f'{scene_name}_train.npz'), **data_train)
 
 # val split
 pair_infos = []
 for image_id in tqdm(val_sample, total=len(val_sample), desc="Get image pairs Val"):
     overlap_score = overlap_matrix[image_id, :]  # 单张图像与各个图像的匹配分数
-    match_pairs = np.where(overlap_score > 0.7)[0]
+    match_pairs = np.where(overlap_score > 0.1)[0]
     for match_id in match_pairs:
         if match_id in val_sample:
             pair_infos.append((np.array([image_id, match_id]),  # 匹配对
                                overlap_score[match_id],      # 该匹配对的重叠分数
                                None))
 
-val_image_paths = np.array(image_paths.copy(), dtype=np.object)
+val_image_paths = np.array(image_paths.copy(), dtype=object)
 val_image_paths[~val_mask] = None
-val_depth_paths = np.array(depth_paths.copy(), dtype=np.object)
+val_depth_paths = np.array(depth_paths.copy(), dtype=object)
 val_depth_paths[~val_mask] = None
-val_intrinsics = np.array(intrinsics.copy(), dtype=np.object)
+val_intrinsics = np.array(intrinsics.copy(), dtype=float)
 val_intrinsics[~val_mask] = None
-val_poses = np.array(poses.copy(), dtype=np.object)
+val_poses = np.array(poses.copy(), dtype=float)
 val_poses[~val_mask] = None
-
+pair_infos = np.array(pair_infos, dtype=object)
+data_val = {
+    'image_paths': val_image_paths,
+    'depth_paths': val_depth_paths,
+    'intrinsics': val_intrinsics,
+    'poses': val_poses,
+    'pair_infos': pair_infos
+}
 np.savez(
-    os.path.join(args.base_path, '%s_val.npz' % scene_name),
-    image_paths=val_image_paths,
-    depth_paths=val_depth_paths,
-    intrinsics=val_intrinsics,
-    poses=val_poses,
-    pair_infos=pair_infos,
+    os.path.join(base_path, f'{scene_name}_val.npz'),
+    **data_val
 )
 
 # test split
 pair_infos = []
 for image_id in tqdm(test_sample, total=len(test_sample), desc="Get image pairs test"):
     overlap_score = overlap_matrix[image_id, :]  # 单张图像与各个图像的匹配分数
-    match_pairs = np.where(overlap_score > 0.7)[0]
+    match_pairs = np.where(overlap_score > 0.1)[0]
     for match_id in match_pairs:
         if match_id in test_sample:
             pair_infos.append((np.array([image_id, match_id]),  # 匹配对
                                overlap_score[match_id],      # 该匹配对的重叠分数
                                None))
 
-test_image_paths = np.array(image_paths.copy(), dtype=np.object)
+test_image_paths = np.array(image_paths.copy(), dtype=object)
 test_image_paths[~test_mask] = None
-test_depth_paths = np.array(depth_paths.copy(), dtype=np.object)
+test_depth_paths = np.array(depth_paths.copy(), dtype=object)
 test_depth_paths[~test_mask] = None
-test_intrinsics = np.array(intrinsics.copy(), dtype=np.object)
+test_intrinsics = np.array(intrinsics.copy(), dtype=float)
 test_intrinsics[~test_mask] = None
-test_poses = np.array(poses.copy(), dtype=np.object)
+test_poses = np.array(poses.copy(), dtype=float)
 test_poses[~test_mask] = None
-
+pair_infos = np.array(pair_infos, dtype=object)
+data_test = {
+    'image_paths': test_image_paths,
+    'depth_paths': test_depth_paths,
+    'intrinsics': test_intrinsics,
+    'poses': test_poses,
+    'pair_infos': pair_infos
+}
 np.savez(
-    os.path.join(args.base_path, '%s_test.npz' % scene_name),
-    image_paths=test_image_paths,
-    depth_paths=test_depth_paths,
-    intrinsics=test_intrinsics,
-    poses=test_poses,
-    pair_infos=pair_infos,
+    os.path.join(base_path, f'{scene_name}_test.npz'),
+    **data_test
 )
 
 # copy images and depths
